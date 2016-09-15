@@ -24,11 +24,12 @@
         opts (assoc clj-opts :attributes atr)]
     (keywords->names opts)))
 
+;; placeholder move to core, with namespaced call to normalize-options
 (defn new-adoc-container
-  "Creates a new AsciidoctorJ (JRuby) container, based on the normalized options
-   provided."
-  [n-opts]
-  (let [acont (Asciidoctor$Factory/create (str (get n-opts "gempath")))]
+  "Creates a new AsciidoctorJ (JRuby) container, based on the options provided."
+  [options]
+  (let [n-opts (normalize-options options)
+        acont  (Asciidoctor$Factory/create (str (get n-opts "gempath")))]
     (doto acont (.requireLibraries (into '() (get n-opts "libraries"))))))
 
 (defn parse-file-metadata
@@ -41,21 +42,20 @@
 (defn asciidoc-to-html
   "Converts a given string of asciidoc into HTML. The normalized options that
    can be provided, influence the behavior of the conversion."
-  [file-content n-opts]
-  (let [container (new-adoc-container n-opts)
-        options   (-> (select-keys ["header_footer" "attributes"] n-opts)
-                      (assoc "backend" "html5"))]
+  [container file-content n-opts]
+  (let [options (-> (select-keys ["header_footer" "attributes"] n-opts)
+                    (assoc "backend" "html5"))]
     (.convert container (md/remove-metadata file-content) options)))
 
 (defn process-file
   "Parses the content of a single file and associates the available metadata to
    the resulting html string. The HTML conversion is dispatched."
-  [file options]
+  [container file options]
   (perun/report-debug "asciidoctor" "processing asciidoc" (:filename file))
   (let [file-content (-> file :full-path io/file slurp)
         ad-metadata  (parse-file-metadata file-content)
         n-opts       (normalize-options options)
-        html         (asciidoc-to-html file-content n-opts)]
+        html         (asciidoc-to-html container file-content n-opts)]
     (merge ad-metadata {:content html} file)))
 
 (defn parse-asciidoc
@@ -66,7 +66,7 @@
    The map of options typically includes an array of libraries and an array of attributes: {:libraries [] :attributes {}}. Libraries are loaded from the AsciidoctorJ project, and can be loaded specifically (\"asciidoctor-diagram/ditaa\") or more broadly (\"asciidoctor-diagram\"). Attributes can be set freely, although a large set
    has been predefined in the Asciidoctor project to configure rendering options
    or set meta-data."
-  [asciidoc-files options]
-  (let [updated-files (doall (map #(process-file % options) asciidoc-files))]
+  [container asciidoc-files options]
+  (let [updated-files (doall (map #(process-file container % options) asciidoc-files))]
     (perun/report-info "asciidoctor" "parsed %s asciidoc files" (count asciidoc-files))
     updated-files))

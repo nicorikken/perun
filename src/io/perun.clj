@@ -6,7 +6,8 @@
             [clojure.java.io :as io]
             [clojure.string :as string]
             [clojure.edn :as edn]
-            [io.perun.core :as perun]))
+            [io.perun.core :as perun]
+            [io.perun.contrib.asciidoctor]))
 
 (def ^:private global-deps
   '[])
@@ -152,6 +153,13 @@
    :header_footer false
    :attributes    {:generator "perun"}})
 
+; (defn ^:private new-adoc-container
+;   "Creates a new AsciidoctorJ (JRuby) container, based on the options provided."
+;   [options]
+;   (let [n-opts (io.perun.contrib.asciidoctor/normalize-options options)
+;         acont  (Asciidoctor$Factory/create (str (get n-opts "gempath")))]
+;     (doto acont (.requireLibraries (into '() (get n-opts "libraries"))))))
+
 (deftask asciidoctor
   "Parse asciidoc files
 
@@ -161,10 +169,11 @@
    asciidoc file's content"
   [o options OPTS edn "options to be passed to the asciidoctor parser"]
 
-  (let [options   (merge +images-resize-defaults+ *opts*)
+  (let [opts      (merge +asciidoctor-defaults+ options)
         pod       (create-pod asciidoctor-deps)
         prev-meta (atom {})
         prev-fs   (atom nil)]
+    (pod/with-call-in @pod (def container (io.perun.contrib.asciidoctor/new-adoc-container ~opts)))
     (boot/with-pre-wrap fileset
       (let [ad-files (->> fileset
                           (boot/fileset-diff @prev-fs)
@@ -179,7 +188,7 @@
                           (map #(boot/tmp-path %))
                           set)
             updated-files (pod/with-call-in @pod
-                             (io.perun.contrib.asciidoctor/parse-asciidoc ~ad-files ~(merge +asciidoctor-defaults+ options)))
+                             (io.perun.contrib.asciidoctor/parse-asciidoc container ~ad-files ~opts))
             initial-metadata (perun/merge-meta* (perun/get-meta fileset) @prev-meta)
             ; Pure merge instead of `merge-with merge` (meta-meta).
             ; This is because updated metadata should replace previous metadata to
