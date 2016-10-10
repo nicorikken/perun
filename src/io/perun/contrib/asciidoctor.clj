@@ -13,7 +13,8 @@
             [clojure.java.io   :as io]
             [clojure.string    :as str]
             [clj-yaml.core     :as yaml]
-            [io.perun.markdown :as md])
+            [io.perun.markdown :as md]
+            [boot.core         :as boot])
   (:import [org.asciidoctor Asciidoctor Asciidoctor$Factory]))
 
 (defn keywords->names
@@ -80,8 +81,10 @@
 (defn new-adoc-container
   "Creates a new AsciidoctorJ (JRuby) container, based on the normalized options
    provided."
-  [n-opts]
-  (let [acont (Asciidoctor$Factory/create (str (get n-opts "gempath")))]
+  [options]
+  (let [n-opts (normalize-options options)
+        acont  (Asciidoctor$Factory/create (str (get n-opts "gempath")))]
+    (perun/report-info "asciidoctor" "new-adoc-container options %s" (str n-opts))
     (doto acont (.requireLibraries (into '() (get n-opts "libraries"))))))
 
 (defn perunize-meta
@@ -113,6 +116,8 @@
   "Converts a given string of asciidoc into HTML. The normalized options that
    can be provided, influence the behavior of the conversion."
   [container adoc-content n-opts]
+  (perun/report-info "asciidoctor" "asciidoc-to-html options %s" (str n-opts))
+  (perun/report-info "asciidoctor" "asciidoc-to-html attributes type %s" (type (get (str n-opts) "attributes")))
   (.convert container adoc-content n-opts))
 
 (defn process-file
@@ -121,7 +126,7 @@
   [container file options]
   (perun/report-debug "asciidoctor" "processing asciidoc" (:filename file))
   (let [basedir      {:base_dir (base-dir (:full-path file))}
-        opts         (merge-with options {:attributes {:base_dir (base-dir (:full-path file))}})
+        opts         (merge-with merge options {:attributes {:base_dir (base-dir (:full-path file))}})
         n-opts       (normalize-options opts)
         file-content (-> file :full-path io/file slurp)
         extraction   (extract-meta file-content)
@@ -129,6 +134,11 @@
         frontmatter  (:meta extraction)
         ad-metadata  (parse-file-metadata container adoc-content frontmatter n-opts)
         html         (asciidoc-to-html container adoc-content n-opts)]
+    ;; (println "(tmp-file file)" (boot/tmp-file file))
+    (perun/report-info "asciidoctor" "process-file options %s" (str options))
+    (perun/report-info "asciidoctor" "process-file opts %s" (str opts))
+    (spit (str (:base_dir basedir) "test-basedir.adoc") "= test\nNico\nHi there\n")
+    ;(boot/add-resource (str basedir "test-basedir.adoc")) ;TODO, only commit in perun.clj
     (merge ad-metadata {:content html} file)))
 ;; TODO get 'skip-front-matter' attribute working to avoid the extract-meta call
 
@@ -151,8 +161,20 @@
    only makes sense for large or complex jobs, taking minutes rather than
    seconds."
   [asciidoc-files options]
-  (let [n-opts        (normalize-options options)
-        container     (new-adoc-container n-opts)
+  (let [container     (new-adoc-container options)
         updated-files (doall (map #(process-file container % options ) asciidoc-files))]
     (perun/report-info "asciidoctor" "parsed %s asciidoc files" (count asciidoc-files))
+    (perun/report-info "asciidoctor" "options %s" (str options))
+    (perun/report-info "asciidoctor" "imagesoutdir %s" (str (:imagesoutdir (:attributes options))))
     updated-files))
+
+;; TODO
+;; [x] Convert options in lowest functions (normalize-options)
+;; [x] Get it working for build-dev, not only for tests
+;; [ ] Make a tmpdir for the images and provide to the `parse-adciidoc`
+;; [ ] Add image directories in the in- and output for tmpdir
+;; [ ] Asume images defined from website root, and available from `resources`.
+;;      Therefore set image root to be the tmpdir, than call `add-resource` on the dir.
+;;      Or place iamges relative to each file, assuming the files will end up corectly.
+;;      `imagesdir` would typically be `./images`, so relative to the file.
+

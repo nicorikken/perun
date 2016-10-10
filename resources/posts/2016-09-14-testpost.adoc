@@ -1,0 +1,27 @@
+---
+name: testpost asciidoc
+---
+= Testpost
+:author: Nico Rikken
+
+== Header
+
+This is a test post.
+
+[quote]
+This is a quote
+
+.And this is Clojure code
+[source, clojure]
+----
+(deftask build
+  "Build blog."
+  []
+  (comp (markdown)
+        (render :renderer renderer)))
+----
+
+[plantuml, lightning-direction]
+....
+Branch --|> Velves
+....

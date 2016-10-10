@@ -154,7 +154,10 @@
                    :backend           "html5" ; for HTML5 output
                    :skip-front-matter ""      ; skip YAML frontmatter
                    :showtitle         ""      ; include <h1> from header
-                   :imagesdir         "."}})  ; image dir relative to adoc file
+                   :imagesoutdir      "/Users/nico/Software/perun/src/"
+                                        ; :imagesoutdir "target"
+                   ; Only works for directories inside the main directory for which the conversion is called.
+                   }})  ; image dir relative to adoc file
 
 (deftask asciidoctor
   "Parse asciidoc files
