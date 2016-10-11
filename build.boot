@@ -51,17 +51,24 @@
   "Build blog dev version"
   []
   (comp ;(base)
+        (show "-f")
         (global-metadata)
         (markdown)
+        (show "-f")
+        (print-meta)
         (asciidoctor)
         (print-meta)
+        (show "-f")
         ;(draft)
         (ttr)
         (slug)
         (permalink)
         (canonical-url)
+        (show "-f")
+        (print-meta)
         (render :renderer 'io.perun.example.post/render)
-        (collection :renderer 'io.perun.example.index/render :page "index.html" :filterer identity)
+        (show "-f")
+        ;(collection :renderer 'io.perun.example.index/render :page "index.html" :filterer identity)
         ))
 ;
 ; (deftask dev

@@ -144,6 +144,7 @@
 
 (def ^:private asciidoctor-deps
   '[[org.asciidoctor/asciidoctorj "1.5.4"]
+    [org.asciidoctor/asciidoctorj-diagram "1.5.0"]
     [circleci/clj-yaml "0.5.5"]])
 
 (def ^:private +asciidoctor-defaults+
