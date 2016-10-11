@@ -14,6 +14,7 @@
                   [com.novemberain/pantomime "2.8.0"]
                   [pandeiro/boot-http "0.7.0"]
                   [org.asciidoctor/asciidoctorj "1.5.4"]
+                  [org.asciidoctor/asciidoctorj-diagram "1.5.0"]
                   [proto-repl "0.3.1"]
                   [adzerk/boot-test "1.1.2"]])
 
