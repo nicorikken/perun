@@ -301,7 +301,7 @@
   (let [pod     (create-pod asciidoctor-deps)
         options (merge +asciidoctor-defaults+ *opts*)]
     (content-pre-wrap
-     {:parse-form-fn (fn [meta] `(io.perun.contrib.asciidoctor/parse-asciidoc ~meta ~options))
+     {:parse-form-fn (fn [metas] `(io.perun.contrib.asciidoctor/parse-asciidoc ~metas ~options))
       :extensions [".ad" ".asc" ".adoc" ".asciidoc"]
       :output-extension ".html"
       :tracer :io.perun/asciidoctor
