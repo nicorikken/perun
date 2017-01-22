@@ -2,6 +2,7 @@
   :source-paths #{"test"}
   :resource-paths #{"src"}
   :dependencies '[[boot/core "2.6.0" :scope "provided"]
+                  [adzerk/boot-test "1.1.2" :scope "test"]
                   [adzerk/bootlaces "0.1.13" :scope "test"]
                   [org.pegdown/pegdown "1.6.0" :scope "test"]
                   [circleci/clj-yaml "0.5.5" :scope "test"]
@@ -12,11 +13,14 @@
                   [clj-time "0.12.0" :scope "test"]
                   [mvxcvi/puget "1.0.0" :scope "test"]
                   [com.novemberain/pantomime "2.8.0" :scope "test"]
-                  [org.asciidoctor/asciidoctorj "1.5.4" :scope "test"]])
+                  [org.asciidoctor/asciidoctorj "1.5.4" :scope "test"]
+                  [org.clojure/tools.namespace "0.3.0-alpha3" :scope "test"]])
 
 (require '[adzerk.bootlaces :refer :all])
+(require '[io.perun-test])
+(require '[boot.test :refer [runtests]])
 
-(def +version+ "0.4.0-SNAPSHOT")
+(def +version+ "0.4.1-SNAPSHOT")
 
 (bootlaces! +version+)
 
