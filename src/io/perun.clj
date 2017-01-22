@@ -291,9 +291,10 @@
   "Parse asciidoc files
 
    This task will look for files ending with `adoc` (preferred),
-   `ad`, `asc`, `adoc` or `asciidoc` and add a `:content` key to
+   `ad`, `asc`, `adoc` or `asciidoc` and add a `:parsed` key to
    their metadata containing the HTML resulting from processing
-   asciidoc file's content"
+   asciidoc file's content. Also writes an HTML file that
+   contains the same content as `:parsed`"
   [d out-dir  OUTDIR str "the output directory"
    m meta     META   edn "metadata to set on each entry; keys here will be overridden by metadata in each file"
    o options  OPTS   edn "options to be passed to the asciidoctor parser"]
