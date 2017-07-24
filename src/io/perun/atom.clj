@@ -32,8 +32,7 @@
        [:link {:href (str base-url filename) :rel "self"}]
        [:link {:href base-url :type "text/html"}]
        [:updated (->> (take 10 posts)
-                      (map updated)
-                      (map iso-datetime)
+                      (map (comp iso-datetime updated first))
                       sort
                       reverse
                       first)]
@@ -44,7 +43,7 @@
           [:name (:author global-metadata)]
           [:email (:author-email global-metadata)]])
 
-       (for [{:keys [uuid canonical-url content name author author-email] :as post} (take 10 posts)
+       (for [[{:keys [uuid canonical-url title author author-email] :as post} content] (take 10 posts)
              :let [author (or author (:author global-metadata))
                    author-email (or author-email (:author-email global-metadata))]]
          (do
@@ -52,9 +51,9 @@
            (assert (seq author) (format "Atom XML requires that each post has author name. Post %s is missing one" canonical-url))
            [:entry
             [:id (str "urn:uuid:" uuid)]
-            [:title name]
+            [:title title]
             (if canonical-url
-              [:link {:href canonical-url :type "text/html" :title name}])
+              [:link {:href canonical-url :type "text/html" :title title}])
             [:published (iso-datetime (published post))]
             [:updated (iso-datetime (updated post))]
             ;; FIXME: plain text on xml:base property

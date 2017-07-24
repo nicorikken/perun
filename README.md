@@ -30,7 +30,7 @@ Check [SPEC.md](./SPEC.md) for documentation about metadata keys used by built-i
  - atom-feed - generate Atom feed
  - print-meta - utility task to print perun metadata (useful for debugging each task)
  - slugs - generate slugs based on any property (available under `:slug` key)
- - build-date - add `:data-build` to global meta and each file meta
+ - build-date - add `:date-build` to global meta and each file meta
  - permalink - create permalink for each page
  - canonical-url - create canonical-url for each page
  - gravatar - find gravatar urls using emails
@@ -169,7 +169,7 @@ See documentation for each task to find all supported options for each plugin.
 (defn renderer [{global :meta posts :entries post :entry}] (:name post))
 
 (defn index-renderer [{global :meta files :entries}]
-  (let [names (map :name files)]
+  (let [names (map :title files)]
     (clojure.string/join "\n" names)))
 
 (deftask build
@@ -247,9 +247,10 @@ We love contributions. Please submit your pull requests.
 
 - [Martin Klepsch](https://github.com/martinklepsch)
 - [Juho Teperi](https://github.com/Deraen)
+- [Brent Hagany](https://github.com/bhagany)
 
 ## License
 
-Copyright © 2013-2016 Hashobject Ltd (team@hashobject.com).
+Copyright © 2013-2017 Hashobject Ltd (team@hashobject.com).
 
 Distributed under the [Eclipse Public License](http://opensource.org/licenses/eclipse-1.0).
